@@ -1,1 +1,83 @@
 # LR1_3sem
+# Лабораторная работа №1: Абстрактные структуры данных
+
+Программа запускается из командной строки. 
+Формат запуска:
+`./LR1 --file <имя_файла> --query '<команда>'`
+
+Где:
+- `--file file.data` — файл, в котором хранятся данные.
+- `--query 'КОМАНДА'` — команда для выполнения.
+
+
+1. Массив (Array)
+
+`MCREATE` | Создать пустой массив | `MCREATE M` |
+`MPUSH` | Добавить в конец | `MPUSH M 10` |
+`MPUSH` | Добавить по индексу | `MPUSH M 0 15` (вставить 15 на 0-ю позицию) |
+`MGET` | Получить элемент по индексу | `MGET M 0` |
+`MDEL` | Удалить элемент по индексу | `MDEL M 0` |
+`MSET` | Заменить элемент по индексу | `MSET M 0 99` |
+`MSIZE` | Узнать длину массива | `MSIZE M` |
+`PRINT` | Вывести массив | `PRINT M` |
+
+ 2. Односвязный список (Singly Linked List) 
+
+`FCREATE` | Создать пустой список | `FCREATE F` |
+`FPUSHHEAD` | Добавить в начало (голову) | `FPUSHHEAD F 5` |
+`FPUSHTAIL` | Добавить в конец (хвост) | `FPUSHTAIL F 10` |
+`FPUSHBEFORE` | Добавить перед указанным | `FPUSHBEFORE F 10 7` (вставить 7 перед 10) |
+`FPUSHAFTER` | Добавить после указанного | `FPUSHAFTER F 10 12` (вставить 12 после 10) |
+`FDELHEAD` | Удалить первый элемент | `FDELHEAD F` |
+`FDELTAIL` | Удалить последний элемент | `FDELTAIL F` |
+`FDELVAL` | Удалить по значению | `FDELVAL F 10` |
+`FGET` | Поиск элемента (TRUE/FALSE) | `FGET F 10` |
+`FSIZE` | Узнать длину списка | `FSIZE F` |
+`PRINT` | Вывести список | `PRINT F` |
+
+3. Двусвязный список (Doubly Linked List)
+
+`LCREATE` | Создать пустой список | `LCREATE L` |
+`LPUSHHEAD` | Добавить в начало | `LPUSHHEAD L 5` |
+`LPUSHTAIL` | Добавить в конец | `LPUSHTAIL L 10` |
+`LPUSHBEFORE` | Добавить перед указанным | `LPUSHBEFORE L 10 7` |
+`LPUSHAFTER` | Добавить после указанного | `LPUSHAFTER L 10 12` |
+`LDELHEAD` | Удалить первый элемент | `LDELHEAD L` |
+`LDELTAIL` | Удалить последний элемент | `LDELTAIL L` |
+`LDELVAL` | Удалить по значению | `LDELVAL L 10` |
+`LGET` | Поиск элемента (TRUE/FALSE) | `LGET L 10` |
+`LSIZE` | Узнать длину списка | `LSIZE L` |
+`PRINT` | Вывести список | `PRINT L` (выводит через ` <-> `) |
+
+4. Стек (Stack) 
+
+`SCREATE` | Создать пустой стек | `SCREATE S` |
+`SPUSH` | Положить элемент на вершину | `SPUSH S 10` |
+`SPOP` | Снять верхний элемент | `SPOP S` |
+`SPEEK` | Посмотреть верхний элемент | `SPEEK S` |
+`SSIZE` | Узнать размер стека | `SSIZE S` |
+`PRINT` | Вывести стек | `PRINT S` (сверху вниз) |
+
+5. Очередь (Queue) 
+
+`QCREATE` | Создать пустую очередь | `QCREATE Q` |
+`QPUSH` | Добавить в конец | `QPUSH Q 10` |
+`QPOP` | Извлечь из начала | `QPOP Q` |
+`QPEEK` | Посмотреть начало | `QPEEK Q` |
+`QSIZE` | Узнать размер очереди | `QSIZE Q` |
+`PRINT` | Вывести очередь | `PRINT Q` (от начала к концу) |
+
+6. Complete Binary Tree 
+
+`TCREATE` | Создать пустое дерево | `TCREATE T` |
+`TINSERT` | Добавить элемент | `TINSERT T 10` |
+`TGET` | Поиск элемента (TRUE/FALSE) | `TGET T 10` |
+`ISMEMBER` | Альтернативный поиск (TRUE/FALSE) | `ISMEMBER T 10` |
+`TCHECK` | Проверка на свойство Complete | `TCHECK T` |
+`TISCOMPLETE` | Альтернативная проверка | `TISCOMPLETE T` |
+`TSIZE` | Узнать размер дерева | `TSIZE T` |
+`PRINT` | Вывести дерево | `PRINT T` (выводит массив и уровни) |
+
+
+7. Общая команда 
+`PRINT <имя>` 
