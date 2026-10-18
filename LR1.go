@@ -8,27 +8,26 @@ import (
 	"strings"
 )
 
-// ============================================================
-// 1. МАССИВ
-// ============================================================
+// 1. Array
+
 type Array struct {
-	data []int
+	data []string
 }
 
-func (a *Array) PushBack(x int) { a.data = append(a.data, x) }
+func (a *Array) PushBack(x string) { a.data = append(a.data, x) }
 
-func (a *Array) PushAt(i, x int) {
+func (a *Array) PushAt(i int, x string) {
 	if i < 0 || i > len(a.data) {
 		fmt.Println("-> ERROR: index out of range")
 		return
 	}
-	a.data = append(a.data[:i], append([]int{x}, a.data[i:]...)...)
+	a.data = append(a.data[:i], append([]string{x}, a.data[i:]...)...)
 }
 
-func (a *Array) Get(i int) int {
+func (a *Array) Get(i int) string {
 	if i < 0 || i >= len(a.data) {
 		fmt.Println("-> ERROR: index out of range")
-		return 0
+		return ""
 	}
 	return a.data[i]
 }
@@ -41,7 +40,7 @@ func (a *Array) Del(i int) {
 	a.data = append(a.data[:i], a.data[i+1:]...)
 }
 
-func (a *Array) Set(i, x int) {
+func (a *Array) Set(i int, x string) {
 	if i < 0 || i >= len(a.data) {
 		fmt.Println("-> ERROR: index out of range")
 		return
@@ -52,24 +51,22 @@ func (a *Array) Set(i, x int) {
 func (a *Array) Size() int { return len(a.data) }
 
 func (a *Array) Print() {
-	fmt.Print("[")
 	for i, v := range a.data {
 		if i > 0 {
-			fmt.Print(", ")
+			fmt.Print(" ")
 		}
 		fmt.Print(v)
 	}
-	fmt.Println("]")
+	fmt.Println()
 }
 
-func (a *Array) All() []int     { return a.data }
-func (a *Array) SetAll(v []int) { a.data = v }
+func (a *Array) All() []string     { return a.data }
+func (a *Array) SetAll(v []string) { a.data = v }
 
-// ============================================================
-// 2. ОДНОСВЯЗНЫЙ СПИСОК
-// ============================================================
+// 2. SinglyList
+
 type SNode struct {
-	val  int
+	val  string
 	next *SNode
 }
 
@@ -78,13 +75,13 @@ type SinglyList struct {
 	cnt  int
 }
 
-func (l *SinglyList) PushFront(x int) {
+func (l *SinglyList) PushFront(x string) {
 	n := &SNode{val: x, next: l.head}
 	l.head = n
 	l.cnt++
 }
 
-func (l *SinglyList) PushBack(x int) {
+func (l *SinglyList) PushBack(x string) {
 	n := &SNode{val: x}
 	if l.head == nil {
 		l.head = n
@@ -98,7 +95,29 @@ func (l *SinglyList) PushBack(x int) {
 	l.cnt++
 }
 
-func (l *SinglyList) PushAfter(target, x int) {
+func (l *SinglyList) PushBefore(target, x string) {
+	if l.head == nil {
+		fmt.Println("-> ERROR: empty")
+		return
+	}
+	if l.head.val == target {
+		l.PushFront(x)
+		return
+	}
+	p := l.head
+	for p.next != nil && p.next.val != target {
+		p = p.next
+	}
+	if p.next == nil {
+		fmt.Println("-> ERROR: not found")
+		return
+	}
+	n := &SNode{val: x, next: p.next}
+	p.next = n
+	l.cnt++
+}
+
+func (l *SinglyList) PushAfter(target, x string) {
 	p := l.head
 	for p != nil && p.val != target {
 		p = p.next
@@ -139,7 +158,7 @@ func (l *SinglyList) DelBack() {
 	l.cnt--
 }
 
-func (l *SinglyList) DelValue(x int) {
+func (l *SinglyList) DelValue(x string) {
 	if l.head == nil {
 		fmt.Println("-> ERROR: empty")
 		return
@@ -160,7 +179,7 @@ func (l *SinglyList) DelValue(x int) {
 	l.cnt--
 }
 
-func (l *SinglyList) Find(x int) bool {
+func (l *SinglyList) Find(x string) bool {
 	p := l.head
 	for p != nil {
 		if p.val == x {
@@ -174,22 +193,16 @@ func (l *SinglyList) Find(x int) bool {
 func (l *SinglyList) Size() int { return l.cnt }
 
 func (l *SinglyList) Print() {
-	fmt.Print("[")
 	p := l.head
-	first := true
 	for p != nil {
-		if !first {
-			fmt.Print(", ")
-		}
-		fmt.Print(p.val)
-		first = false
+		fmt.Print(p.val, " ")
 		p = p.next
 	}
-	fmt.Println("]")
+	fmt.Println()
 }
 
-func (l *SinglyList) All() []int {
-	var v []int
+func (l *SinglyList) All() []string {
+	var v []string
 	p := l.head
 	for p != nil {
 		v = append(v, p.val)
@@ -198,7 +211,7 @@ func (l *SinglyList) All() []int {
 	return v
 }
 
-func (l *SinglyList) SetAll(v []int) {
+func (l *SinglyList) SetAll(v []string) {
 	l.head = nil
 	l.cnt = 0
 	for _, x := range v {
@@ -206,11 +219,10 @@ func (l *SinglyList) SetAll(v []int) {
 	}
 }
 
-// ============================================================
-// 3. ДВУСВЯЗНЫЙ СПИСОК
-// ============================================================
+// 3. DoublyList
+
 type DNode struct {
-	val        int
+	val        string
 	prev, next *DNode
 }
 
@@ -219,7 +231,7 @@ type DoublyList struct {
 	cnt        int
 }
 
-func (l *DoublyList) PushFront(x int) {
+func (l *DoublyList) PushFront(x string) {
 	n := &DNode{val: x, next: l.head}
 	if l.head != nil {
 		l.head.prev = n
@@ -231,7 +243,7 @@ func (l *DoublyList) PushFront(x int) {
 	l.cnt++
 }
 
-func (l *DoublyList) PushBack(x int) {
+func (l *DoublyList) PushBack(x string) {
 	n := &DNode{val: x, prev: l.tail}
 	if l.tail != nil {
 		l.tail.next = n
@@ -243,7 +255,30 @@ func (l *DoublyList) PushBack(x int) {
 	l.cnt++
 }
 
-func (l *DoublyList) PushAfter(target, x int) {
+func (l *DoublyList) PushBefore(target, x string) {
+	if l.head == nil {
+		fmt.Println("-> ERROR: empty")
+		return
+	}
+	if l.head.val == target {
+		l.PushFront(x)
+		return
+	}
+	p := l.head
+	for p != nil && p.val != target {
+		p = p.next
+	}
+	if p == nil {
+		fmt.Println("-> ERROR: not found")
+		return
+	}
+	n := &DNode{val: x, prev: p.prev, next: p}
+	p.prev.next = n
+	p.prev = n
+	l.cnt++
+}
+
+func (l *DoublyList) PushAfter(target, x string) {
 	p := l.head
 	for p != nil && p.val != target {
 		p = p.next
@@ -291,7 +326,7 @@ func (l *DoublyList) DelBack() {
 	l.cnt--
 }
 
-func (l *DoublyList) DelValue(x int) {
+func (l *DoublyList) DelValue(x string) {
 	p := l.head
 	for p != nil && p.val != x {
 		p = p.next
@@ -313,7 +348,7 @@ func (l *DoublyList) DelValue(x int) {
 	l.cnt--
 }
 
-func (l *DoublyList) Find(x int) bool {
+func (l *DoublyList) Find(x string) bool {
 	p := l.head
 	for p != nil {
 		if p.val == x {
@@ -327,22 +362,21 @@ func (l *DoublyList) Find(x int) bool {
 func (l *DoublyList) Size() int { return l.cnt }
 
 func (l *DoublyList) Print() {
-	fmt.Print("[")
 	p := l.head
 	first := true
 	for p != nil {
 		if !first {
-			fmt.Print(", ")
+			fmt.Print(" <-> ")
 		}
 		fmt.Print(p.val)
 		first = false
 		p = p.next
 	}
-	fmt.Println("]")
+	fmt.Println()
 }
 
-func (l *DoublyList) All() []int {
-	var v []int
+func (l *DoublyList) All() []string {
+	var v []string
 	p := l.head
 	for p != nil {
 		v = append(v, p.val)
@@ -351,7 +385,7 @@ func (l *DoublyList) All() []int {
 	return v
 }
 
-func (l *DoublyList) SetAll(v []int) {
+func (l *DoublyList) SetAll(v []string) {
 	l.head = nil
 	l.tail = nil
 	l.cnt = 0
@@ -360,21 +394,20 @@ func (l *DoublyList) SetAll(v []int) {
 	}
 }
 
-// ============================================================
-// 4. СТЕК
-// ============================================================
+// 4. Stack
+
 type Stack struct {
-	data []int
+	data []string
 }
 
-func (s *Stack) Push(x int) { s.data = append(s.data, x) }
+func (s *Stack) Push(x string) { s.data = append(s.data, x) }
 
 func (s *Stack) Pop() {
 	if len(s.data) == 0 {
 		fmt.Println("-> ERROR: empty")
 		return
 	}
-	fmt.Println("->", s.data[len(s.data)-1])
+	fmt.Println(s.data[len(s.data)-1])
 	s.data = s.data[:len(s.data)-1]
 }
 
@@ -389,34 +422,28 @@ func (s *Stack) Peek() {
 func (s *Stack) Size() int { return len(s.data) }
 
 func (s *Stack) Print() {
-	fmt.Print("[")
 	for i := len(s.data) - 1; i >= 0; i-- {
-		fmt.Print(s.data[i])
-		if i > 0 {
-			fmt.Print(", ")
-		}
+		fmt.Println(s.data[i])
 	}
-	fmt.Println("]")
 }
 
-func (s *Stack) All() []int     { return s.data }
-func (s *Stack) SetAll(v []int) { s.data = v }
+func (s *Stack) All() []string     { return s.data }
+func (s *Stack) SetAll(v []string) { s.data = v }
 
-// ============================================================
-// 5. ОЧЕРЕДЬ
-// ============================================================
+// 5. Queue
+
 type Queue struct {
-	data []int
+	data []string
 }
 
-func (q *Queue) Push(x int) { q.data = append(q.data, x) }
+func (q *Queue) Push(x string) { q.data = append(q.data, x) }
 
 func (q *Queue) Pop() {
 	if len(q.data) == 0 {
 		fmt.Println("-> ERROR: empty")
 		return
 	}
-	fmt.Println("->", q.data[0])
+	fmt.Println(q.data[0])
 	q.data = q.data[1:]
 }
 
@@ -431,42 +458,38 @@ func (q *Queue) Peek() {
 func (q *Queue) Size() int { return len(q.data) }
 
 func (q *Queue) Print() {
-	fmt.Print("[")
 	for i, v := range q.data {
 		if i > 0 {
-			fmt.Print(", ")
+			fmt.Print(" ")
 		}
 		fmt.Print(v)
 	}
-	fmt.Println("]")
+	fmt.Println()
 }
 
-func (q *Queue) All() []int     { return q.data }
-func (q *Queue) SetAll(v []int) { q.data = v }
+func (q *Queue) All() []string     { return q.data }
+func (q *Queue) SetAll(v []string) { q.data = v }
 
-// ============================================================
-// ГЛОБАЛЬНЫЕ СЛОВАРИ
-// ============================================================
+// словари
+
 var arrays = map[string]*Array{}
 var flists = map[string]*SinglyList{}
 var llists = map[string]*DoublyList{}
 var stacks = map[string]*Stack{}
 var queues = map[string]*Queue{}
 
-// ============================================================
-// ФАЙЛ: СОХРАНЕНИЕ / ЗАГРУЗКА
-// ============================================================
+// Файл: сохранение / загрузка
+
 func saveToFile(path string) {
 	f, err := os.Create(path)
 	if err != nil {
-		fmt.Println("-> ERROR: cannot write file")
 		return
 	}
 	defer f.Close()
 	w := bufio.NewWriter(f)
 	defer w.Flush()
 
-	writeLine := func(prefix, name string, vals []int) {
+	writeLine := func(prefix, name string, vals []string) {
 		fmt.Fprint(w, prefix, " ", name)
 		for _, x := range vals {
 			fmt.Fprint(w, " ", x)
@@ -506,13 +529,8 @@ func loadFromFile(path string) {
 			continue
 		}
 		typ, name := parts[0], parts[1]
-		var vals []int
-		for _, tok := range parts[2:] {
-			x, err := strconv.Atoi(tok)
-			if err == nil {
-				vals = append(vals, x)
-			}
-		}
+		vals := parts[2:]
+
 		switch typ {
 		case "ARRAY":
 			arrays[name] = &Array{}
@@ -533,9 +551,8 @@ func loadFromFile(path string) {
 	}
 }
 
-// ============================================================
 // ВСПОМОГАТЕЛЬНОЕ
-// ============================================================
+
 func atoi(s string) int {
 	x, _ := strconv.Atoi(s)
 	return x
@@ -572,9 +589,8 @@ func getQueue(name string) *Queue {
 	return queues[name]
 }
 
-// ============================================================
-// ОБРАБОТКА КОМАНД
-// ============================================================
+// Обработка команд
+
 func processCommand(query string) {
 	parts := strings.Fields(query)
 	if len(parts) < 2 {
@@ -585,24 +601,68 @@ func processCommand(query string) {
 	name := parts[1]
 	rest := parts[2:]
 
+	// Create
 	switch cmd {
-	// ---------- МАССИВ ----------
+	case "MCREATE":
+		if _, ok := arrays[name]; ok {
+			fmt.Println("-> ERROR: array exists")
+			return
+		}
+		arrays[name] = &Array{}
+		fmt.Println("-> OK")
+		return
+	case "FCREATE":
+		if _, ok := flists[name]; ok {
+			fmt.Println("-> ERROR: list exists")
+			return
+		}
+		flists[name] = &SinglyList{}
+		fmt.Println("-> OK")
+		return
+	case "LCREATE":
+		if _, ok := llists[name]; ok {
+			fmt.Println("-> ERROR: list exists")
+			return
+		}
+		llists[name] = &DoublyList{}
+		fmt.Println("-> OK")
+		return
+	case "SCREATE":
+		if _, ok := stacks[name]; ok {
+			fmt.Println("-> ERROR: stack exists")
+			return
+		}
+		stacks[name] = &Stack{}
+		fmt.Println("-> OK")
+		return
+	case "QCREATE":
+		if _, ok := queues[name]; ok {
+			fmt.Println("-> ERROR: queue exists")
+			return
+		}
+		queues[name] = &Queue{}
+		fmt.Println("-> OK")
+		return
+	}
+
+	// array
+	switch cmd {
 	case "MPUSH":
 		if len(rest) == 1 {
-			getArray(name).PushBack(atoi(rest[0]))
-			fmt.Println("-> OK")
+			getArray(name).PushBack(rest[0])
+			fmt.Println("->", rest[0])
 		} else if len(rest) == 2 {
-			getArray(name).PushAt(atoi(rest[0]), atoi(rest[1]))
-			fmt.Println("-> OK")
+			getArray(name).PushAt(atoi(rest[0]), rest[1])
+			fmt.Println("->", rest[1])
 		} else {
-			fmt.Println("-> ERROR: MPUSH <name> <value> | <name> <idx> <value>")
+			fmt.Println("-> ERROR: format")
 		}
 		return
 	case "MGET":
 		if len(rest) == 1 {
 			fmt.Println("->", getArray(name).Get(atoi(rest[0])))
 		} else {
-			fmt.Println("-> ERROR: MGET <name> <idx>")
+			fmt.Println("-> ERROR: format")
 		}
 		return
 	case "MDEL":
@@ -610,128 +670,156 @@ func processCommand(query string) {
 			getArray(name).Del(atoi(rest[0]))
 			fmt.Println("-> OK")
 		} else {
-			fmt.Println("-> ERROR: MDEL <name> <idx>")
+			fmt.Println("-> ERROR: format")
 		}
 		return
 	case "MSET":
 		if len(rest) == 2 {
-			getArray(name).Set(atoi(rest[0]), atoi(rest[1]))
+			getArray(name).Set(atoi(rest[0]), rest[1])
 			fmt.Println("-> OK")
 		} else {
-			fmt.Println("-> ERROR: MSET <name> <idx> <value>")
+			fmt.Println("-> ERROR: format")
 		}
 		return
 	case "MSIZE":
 		fmt.Println("->", getArray(name).Size())
 		return
 
-	// ---------- ОДНОСВЯЗНЫЙ СПИСОК ----------
-	case "FPUSH":
+	// list
+	case "FPUSHHEAD":
 		if len(rest) == 1 {
-			getFList(name).PushBack(atoi(rest[0]))
-			fmt.Println("-> OK")
-		} else if len(rest) == 2 {
-			where := rest[0]
-			v := atoi(rest[1])
-			if where == "front" || where == "head" {
-				getFList(name).PushFront(v)
-			} else if where == "back" || where == "tail" {
-				getFList(name).PushBack(v)
-			} else {
-				getFList(name).PushAfter(atoi(where), v)
-			}
-			fmt.Println("-> OK")
+			getFList(name).PushFront(rest[0])
+			fmt.Println("->", rest[0])
 		} else {
-			fmt.Println("-> ERROR: FPUSH <name> <value> | <name> front|back|target <value>")
+			fmt.Println("-> Ошибка: неверное количество аргументов для FPUSHHEAD")
 		}
 		return
-	case "FDEL":
+	case "FPUSHTAIL":
 		if len(rest) == 1 {
-			what := rest[0]
-			if what == "front" || what == "head" {
-				getFList(name).DelFront()
-			} else if what == "back" || what == "tail" {
-				getFList(name).DelBack()
-			} else {
-				getFList(name).DelValue(atoi(what))
-			}
+			getFList(name).PushBack(rest[0])
+			fmt.Println("->", rest[0])
+		} else {
+			fmt.Println("-> Ошибка: неверное количество аргументов для FPUSHTAIL")
+		}
+		return
+	case "FPUSHBEFORE":
+		if len(rest) == 2 {
+			getFList(name).PushBefore(rest[0], rest[1])
+			fmt.Println("->", rest[1])
+		} else {
+			fmt.Println("-> Ошибка: неверное количество аргументов для FPUSHBEFORE")
+		}
+		return
+	case "FPUSHAFTER":
+		if len(rest) == 2 {
+			getFList(name).PushAfter(rest[0], rest[1])
+			fmt.Println("->", rest[1])
+		} else {
+			fmt.Println("-> Ошибка: неверное количество аргументов для FPUSHAFTER")
+		}
+		return
+	case "FDELHEAD":
+		getFList(name).DelFront()
+		fmt.Println("-> OK")
+		return
+	case "FDELTAIL":
+		getFList(name).DelBack()
+		fmt.Println("-> OK")
+		return
+	case "FDELVAL":
+		if len(rest) == 1 {
+			getFList(name).DelValue(rest[0])
 			fmt.Println("-> OK")
 		} else {
-			fmt.Println("-> ERROR: FDEL <name> front|back|value")
+			fmt.Println("-> ERROR: format")
 		}
 		return
 	case "FGET":
 		if len(rest) == 1 {
-			if getFList(name).Find(atoi(rest[0])) {
+			if getFList(name).Find(rest[0]) {
 				fmt.Println("-> TRUE")
 			} else {
 				fmt.Println("-> FALSE")
 			}
 		} else {
-			fmt.Println("-> ERROR: FGET <name> <value>")
+			fmt.Println("-> ERROR: format")
 		}
 		return
 	case "FSIZE":
 		fmt.Println("->", getFList(name).Size())
 		return
 
-	// ---------- ДВУСВЯЗНЫЙ СПИСОК ----------
-	case "LPUSH":
+	// double list
+	case "LPUSHHEAD":
 		if len(rest) == 1 {
-			getLList(name).PushBack(atoi(rest[0]))
-			fmt.Println("-> OK")
-		} else if len(rest) == 2 {
-			where := rest[0]
-			v := atoi(rest[1])
-			if where == "front" || where == "head" {
-				getLList(name).PushFront(v)
-			} else if where == "back" || where == "tail" {
-				getLList(name).PushBack(v)
-			} else {
-				getLList(name).PushAfter(atoi(where), v)
-			}
-			fmt.Println("-> OK")
+			getLList(name).PushFront(rest[0])
+			fmt.Println("->", rest[0])
 		} else {
-			fmt.Println("-> ERROR: LPUSH <name> <value> | <name> front|back|target <value>")
+			fmt.Println("-> Ошибка: неверное количество аргументов для LPUSHHEAD")
 		}
 		return
-	case "LDEL":
+	case "LPUSHTAIL":
 		if len(rest) == 1 {
-			what := rest[0]
-			if what == "front" || what == "head" {
-				getLList(name).DelFront()
-			} else if what == "back" || what == "tail" {
-				getLList(name).DelBack()
-			} else {
-				getLList(name).DelValue(atoi(what))
-			}
+			getLList(name).PushBack(rest[0])
+			fmt.Println("->", rest[0])
+		} else {
+			fmt.Println("-> Ошибка: неверное количество аргументов для LPUSHTAIL")
+		}
+		return
+	case "LPUSHBEFORE":
+		if len(rest) == 2 {
+			getLList(name).PushBefore(rest[0], rest[1])
+			fmt.Println("->", rest[1])
+		} else {
+			fmt.Println("-> Ошибка: неверное количество аргументов для LPUSHBEFORE")
+		}
+		return
+	case "LPUSHAFTER":
+		if len(rest) == 2 {
+			getLList(name).PushAfter(rest[0], rest[1])
+			fmt.Println("->", rest[1])
+		} else {
+			fmt.Println("-> Ошибка: неверное количество аргументов для LPUSHAFTER")
+		}
+		return
+	case "LDELHEAD":
+		getLList(name).DelFront()
+		fmt.Println("-> OK")
+		return
+	case "LDELTAIL":
+		getLList(name).DelBack()
+		fmt.Println("-> OK")
+		return
+	case "LDELVAL":
+		if len(rest) == 1 {
+			getLList(name).DelValue(rest[0])
 			fmt.Println("-> OK")
 		} else {
-			fmt.Println("-> ERROR: LDEL <name> front|back|value")
+			fmt.Println("-> ERROR: format")
 		}
 		return
 	case "LGET":
 		if len(rest) == 1 {
-			if getLList(name).Find(atoi(rest[0])) {
+			if getLList(name).Find(rest[0]) {
 				fmt.Println("-> TRUE")
 			} else {
 				fmt.Println("-> FALSE")
 			}
 		} else {
-			fmt.Println("-> ERROR: LGET <name> <value>")
+			fmt.Println("-> ERROR: format")
 		}
 		return
 	case "LSIZE":
 		fmt.Println("->", getLList(name).Size())
 		return
 
-	// ---------- СТЕК ----------
+	//Stack
 	case "SPUSH":
 		if len(rest) == 1 {
-			getStack(name).Push(atoi(rest[0]))
-			fmt.Println("-> OK")
+			getStack(name).Push(rest[0])
+			fmt.Println("->", rest[0])
 		} else {
-			fmt.Println("-> ERROR: SPUSH <name> <value>")
+			fmt.Println("-> ERROR: format")
 		}
 		return
 	case "SPOP":
@@ -744,13 +832,13 @@ func processCommand(query string) {
 		fmt.Println("->", getStack(name).Size())
 		return
 
-	// ---------- ОЧЕРЕДЬ ----------
+	// Queue
 	case "QPUSH":
 		if len(rest) == 1 {
-			getQueue(name).Push(atoi(rest[0]))
-			fmt.Println("-> OK")
+			getQueue(name).Push(rest[0])
+			fmt.Println("->", rest[0])
 		} else {
-			fmt.Println("-> ERROR: QPUSH <name> <value>")
+			fmt.Println("-> ERROR: format")
 		}
 		return
 	case "QPOP":
@@ -763,7 +851,7 @@ func processCommand(query string) {
 		fmt.Println("->", getQueue(name).Size())
 		return
 
-	// ---------- PRINT ----------
+	//Print
 	case "PRINT":
 		if s, ok := arrays[name]; ok {
 			s.Print()
@@ -792,9 +880,7 @@ func processCommand(query string) {
 	fmt.Println("-> ERROR: unknown command '" + cmd + "'")
 }
 
-// ============================================================
-// MAIN
-// ============================================================
+// Main
 func main() {
 	var filePath, query string
 	args := os.Args[1:]
@@ -814,7 +900,7 @@ func main() {
 	}
 
 	if filePath == "" || query == "" {
-		fmt.Println("Usage: ./dbms --file <file> --query '<command>'")
+		fmt.Println("Usage: ./LR1_go --file <file> --query '<command>'")
 		return
 	}
 
