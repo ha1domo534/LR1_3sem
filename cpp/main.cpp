@@ -4,7 +4,6 @@
 #include <vector>
 #include <map>
 #include <string>
-#include <algorithm>
 
 #include "array.h"
 #include "list.h"
@@ -28,8 +27,9 @@ void saveToFile(const string& path) {
     
     for (auto& p : arrays) {
         f << "ARRAY " << p.first;
-        for (const string& x : p.second.all()) f << " " << x;
-        f << "\n";
+        int n = p.second.size(); string* arr = p.second.all();
+        for (int i = 0; i < n; i++) f << " " << arr[i];
+        f << "\n"; delete[] arr;
     }
     for (auto& p : flists) {
         f << "FLIST " << p.first;
@@ -70,8 +70,13 @@ void loadFromFile(const string& path) {
         vector<string> v;
         string x;
         while (iss >> x) v.push_back(x);
-
-        if (type == "ARRAY") arrays[name].setAll(v);
+        
+        if (type == "ARRAY") {
+            int n = v.size(); string* arr = new string[n];
+            for (int i = 0; i < n; i++) arr[i] = v[i];
+            arrays[name].setAll(arr, n);
+            delete[] arr;
+        }
         else if (type == "FLIST") flists[name].setAll(v);
         else if (type == "LLIST") llists[name].setAll(v);
         else if (type == "STACK") stacks[name].setAll(v);
@@ -86,31 +91,12 @@ void processCommand(const string& query) {
     string cmd, name;
     if (!(iss >> cmd >> name)) { cout << "-> ERROR: empty command\n"; return; }
 
-    //Создание структур
-    if (cmd == "MCREATE") {
-        if (arrays.count(name)) { cout << "-> ERROR: array exists\n"; return; }
-        arrays[name] = Array(); cout << "-> OK\n"; return;
-    }
-    if (cmd == "FCREATE") {
-        if (flists.count(name)) { cout << "-> ERROR: list exists\n"; return; }
-        flists[name] = SinglyList(); cout << "-> OK\n"; return;
-    }
-    if (cmd == "LCREATE") {
-        if (llists.count(name)) { cout << "-> ERROR: list exists\n"; return; }
-        llists[name] = DoublyList(); cout << "-> OK\n"; return;
-    }
-    if (cmd == "SCREATE") {
-        if (stacks.count(name)) { cout << "-> ERROR: stack exists\n"; return; }
-        stacks[name] = Stack(); cout << "-> OK\n"; return;
-    }
-    if (cmd == "QCREATE") {
-        if (queues.count(name)) { cout << "-> ERROR: queue exists\n"; return; }
-        queues[name] = Queue(); cout << "-> OK\n"; return;
-    }
-    if (cmd == "TCREATE") {
-        if (trees.count(name)) { cout << "-> ERROR: tree exists\n"; return; }
-        trees[name] = CompleteBinaryTree(); cout << "-> OK\n"; return;
-    }
+    if (cmd == "MCREATE") { arrays[name] = Array(); cout << "-> OK\n"; return; }
+    if (cmd == "FCREATE") { flists[name] = SinglyList(); cout << "-> OK\n"; return; }
+    if (cmd == "LCREATE") { llists[name] = DoublyList(); cout << "-> OK\n"; return; }
+    if (cmd == "SCREATE") { stacks[name] = Stack(); cout << "-> OK\n"; return; }
+    if (cmd == "QCREATE") { queues[name] = Queue(); cout << "-> OK\n"; return; }
+    if (cmd == "TCREATE") { trees[name] = CompleteBinaryTree(); cout << "-> OK\n"; return; }
 
     vector<string> rest;
     string tok;
@@ -120,152 +106,57 @@ void processCommand(const string& query) {
     if (cmd == "MPUSH") {
         if (rest.size() == 1) { arrays[name].push_back(rest[0]); cout << "-> " << rest[0] << "\n"; }
         else if (rest.size() == 2) { arrays[name].push_at(stoi(rest[0]), rest[1]); cout << "-> " << rest[1] << "\n"; }
-        else cout << "-> ERROR: format\n";
         return;
     }
-    if (cmd == "MGET") {
-        if (rest.size() == 1) cout << "-> " << arrays[name].get(stoi(rest[0])) << "\n";
-        else cout << "-> ERROR: format\n";
-        return;
-    }
-    if (cmd == "MDEL") {
-        if (rest.size() == 1) { arrays[name].del(stoi(rest[0])); cout << "-> OK\n"; }
-        else cout << "-> ERROR: format\n";
-        return;
-    }
-    if (cmd == "MSET") {
-        if (rest.size() == 2) { arrays[name].set(stoi(rest[0]), rest[1]); cout << "-> OK\n"; }
-        else cout << "-> ERROR: format\n";
-        return;
-    }
+    if (cmd == "MGET") { if (rest.size() == 1) cout << "-> " << arrays[name].get(stoi(rest[0])) << "\n"; return; }
+    if (cmd == "MDEL") { if (rest.size() == 1) { arrays[name].del(stoi(rest[0])); cout << "-> OK\n"; } return; }
+    if (cmd == "MSET") { if (rest.size() == 2) { arrays[name].set(stoi(rest[0]), rest[1]); cout << "-> OK\n"; } return; }
     if (cmd == "MSIZE") { cout << "-> " << arrays[name].size() << "\n"; return; }
 
-    //Односвязный список
-    if (cmd == "FPUSHHEAD") {
-        if (rest.size() == 1) { flists[name].push_front(rest[0]); cout << "-> " << rest[0] << "\n"; }
-        else cout << "-> Ошибка: неверное количество аргументов для FPUSHHEAD\n";
-        return;
-    }
-    if (cmd == "FPUSHTAIL") {
-        if (rest.size() == 1) { flists[name].push_back(rest[0]); cout << "-> " << rest[0] << "\n"; }
-        else cout << "-> Ошибка: неверное количество аргументов для FPUSHTAIL\n";
-        return;
-    }
-    if (cmd == "FPUSHBEFORE") {
-        if (rest.size() == 2) { flists[name].push_before(rest[0], rest[1]); cout << "-> " << rest[1] << "\n"; }
-        else cout << "-> Ошибка: неверное количество аргументов для FPUSHBEFORE\n";
-        return;
-    }
-    if (cmd == "FPUSHAFTER") {
-        if (rest.size() == 2) { flists[name].push_after(rest[0], rest[1]); cout << "-> " << rest[1] << "\n"; }
-        else cout << "-> Ошибка: неверное количество аргументов для FPUSHAFTER\n";
-        return;
-    }
+    //Списки (добавлены новые команды)
+    if (cmd == "FPUSHHEAD") { if (rest.size() == 1) { flists[name].push_front(rest[0]); cout << "-> " << rest[0] << "\n"; } return; }
+    if (cmd == "FPUSHTAIL") { if (rest.size() == 1) { flists[name].push_back(rest[0]); cout << "-> " << rest[0] << "\n"; } return; }
+    if (cmd == "FPUSHBEFORE") { if (rest.size() == 2) { flists[name].push_before(rest[0], rest[1]); cout << "-> " << rest[1] << "\n"; } return; }
+    if (cmd == "FPUSHAFTER") { if (rest.size() == 2) { flists[name].push_after(rest[0], rest[1]); cout << "-> " << rest[1] << "\n"; } return; }
     if (cmd == "FDELHEAD") { flists[name].del_front(); cout << "-> OK\n"; return; }
     if (cmd == "FDELTAIL") { flists[name].del_back(); cout << "-> OK\n"; return; }
-    if (cmd == "FDELVAL") {
-        if (rest.size() == 1) { flists[name].del_value(rest[0]); cout << "-> OK\n"; }
-        else cout << "-> ERROR: format\n";
-        return;
-    }
-    if (cmd == "FGET") {
-        if (rest.size() == 1) {
-            bool found = flists[name].find(rest[0]);
-            cout << "-> " << (found ? "TRUE" : "FALSE") << "\n";
-        }
-        else cout << "-> ERROR: format\n";
-        return;
-    }
+    if (cmd == "FDELVAL") { if (rest.size() == 1) { flists[name].del_value(rest[0]); cout << "-> OK\n"; } return; }
+    if (cmd == "FDELBEFORE") { if (rest.size() == 1) { flists[name].del_before(rest[0]); cout << "-> OK\n"; } return; }
+    if (cmd == "FDELAFTER") { if (rest.size() == 1) { flists[name].del_after(rest[0]); cout << "-> OK\n"; } return; }
+    if (cmd == "FGETAT") { if (rest.size() == 1) cout << "-> " << flists[name].get_at(stoi(rest[0])) << "\n"; return; }
+    if (cmd == "FGET") { if (rest.size() == 1) { cout << "-> " << (flists[name].find(rest[0]) ? "TRUE" : "FALSE") << "\n"; } return; }
     if (cmd == "FSIZE") { cout << "-> " << flists[name].size() << "\n"; return; }
 
-    //Двусвязный список
-    if (cmd == "LPUSHHEAD") {
-        if (rest.size() == 1) { llists[name].push_front(rest[0]); cout << "-> " << rest[0] << "\n"; }
-        else cout << "-> Ошибка: неверное количество аргументов для LPUSHHEAD\n";
-        return;
-    }
-    if (cmd == "LPUSHTAIL") {
-        if (rest.size() == 1) { llists[name].push_back(rest[0]); cout << "-> " << rest[0] << "\n"; }
-        else cout << "-> Ошибка: неверное количество аргументов для LPUSHTAIL\n";
-        return;
-    }
-    if (cmd == "LPUSHBEFORE") {
-        if (rest.size() == 2) { llists[name].push_before(rest[0], rest[1]); cout << "-> " << rest[1] << "\n"; }
-        else cout << "-> Ошибка: неверное количество аргументов для LPUSHBEFORE\n";
-        return;
-    }
-    if (cmd == "LPUSHAFTER") {
-        if (rest.size() == 2) { llists[name].push_after(rest[0], rest[1]); cout << "-> " << rest[1] << "\n"; }
-        else cout << "-> Ошибка: неверное количество аргументов для LPUSHAFTER\n";
-        return;
-    }
+    if (cmd == "LPUSHHEAD") { if (rest.size() == 1) { llists[name].push_front(rest[0]); cout << "-> " << rest[0] << "\n"; } return; }
+    if (cmd == "LPUSHTAIL") { if (rest.size() == 1) { llists[name].push_back(rest[0]); cout << "-> " << rest[0] << "\n"; } return; }
+    if (cmd == "LPUSHBEFORE") { if (rest.size() == 2) { llists[name].push_before(rest[0], rest[1]); cout << "-> " << rest[1] << "\n"; } return; }
+    if (cmd == "LPUSHAFTER") { if (rest.size() == 2) { llists[name].push_after(rest[0], rest[1]); cout << "-> " << rest[1] << "\n"; } return; }
     if (cmd == "LDELHEAD") { llists[name].del_front(); cout << "-> OK\n"; return; }
     if (cmd == "LDELTAIL") { llists[name].del_back(); cout << "-> OK\n"; return; }
-    if (cmd == "LDELVAL") {
-        if (rest.size() == 1) { llists[name].del_value(rest[0]); cout << "-> OK\n"; }
-        else cout << "-> ERROR: format\n";
-        return;
-    }
-    if (cmd == "LGET") {
-        if (rest.size() == 1) {
-            bool found = llists[name].find(rest[0]);
-            cout << "-> " << (found ? "TRUE" : "FALSE") << "\n";
-        }
-        else cout << "-> ERROR: format\n";
-        return;
-    }
+    if (cmd == "LDELVAL") { if (rest.size() == 1) { llists[name].del_value(rest[0]); cout << "-> OK\n"; } return; }
+    if (cmd == "LDELBEFORE") { if (rest.size() == 1) { llists[name].del_before(rest[0]); cout << "-> OK\n"; } return; }
+    if (cmd == "LDELAFTER") { if (rest.size() == 1) { llists[name].del_after(rest[0]); cout << "-> OK\n"; } return; }
+    if (cmd == "LGETAT") { if (rest.size() == 1) cout << "-> " << llists[name].get_at(stoi(rest[0])) << "\n"; return; }
+    if (cmd == "LGET") { if (rest.size() == 1) { cout << "-> " << (llists[name].find(rest[0]) ? "TRUE" : "FALSE") << "\n"; } return; }
     if (cmd == "LSIZE") { cout << "-> " << llists[name].size() << "\n"; return; }
 
     //Стек
-    if (cmd == "SPUSH") {
-        if (rest.size() == 1) { stacks[name].push(rest[0]); cout << "-> " << rest[0] << "\n"; }
-        else cout << "-> ERROR: format\n";
-        return;
-    }
+    if (cmd == "SPUSH") { if (rest.size() == 1) { stacks[name].push(rest[0]); cout << "-> " << rest[0] << "\n"; } return; }
     if (cmd == "SPOP") { stacks[name].pop(); return; }
     if (cmd == "SPEEK") { stacks[name].peek(); return; }
     if (cmd == "SSIZE") { cout << "-> " << stacks[name].size() << "\n"; return; }
 
     //Очередь
-    if (cmd == "QPUSH") {
-        if (rest.size() == 1) { queues[name].push(rest[0]); cout << "-> " << rest[0] << "\n"; }
-        else cout << "-> ERROR: format\n";
-        return;
-    }
+    if (cmd == "QPUSH") { if (rest.size() == 1) { queues[name].push(rest[0]); cout << "-> " << rest[0] << "\n"; } return; }
     if (cmd == "QPOP") { queues[name].pop(); return; }
     if (cmd == "QPEEK") { queues[name].peek(); return; }
     if (cmd == "QSIZE") { cout << "-> " << queues[name].size() << "\n"; return; }
 
     //Дерево
-    if (cmd == "TPUSH") {
-        if (rest.size() == 1) { 
-            trees[name].insert(rest[0]); 
-            cout << "-> " << rest[0] << "\n"; 
-        }
-        else cout << "-> ERROR: format\n";
-        return;
-    }
-    if (cmd == "TBREAK") {
-        if (rest.size() == 3) {
-            char side = rest[1][0];
-            bool ok = trees[name].forceInsert(rest[0], side, rest[2]);
-            cout << "-> " << (ok ? "OK" : "FAILED") << "\n";
-        } else cout << "-> ERROR: format\n";
-        return;
-    }
-    if (cmd == "TGET" || cmd == "ISMEMBER") {
-        if (rest.size() == 1) {
-            bool found = trees[name].find(rest[0]);
-            cout << "-> " << (found ? "TRUE" : "FALSE") << "\n";
-        }
-        else cout << "-> ERROR: format\n";
-        return;
-    }
-    if (cmd == "TCHECK") {
-        bool ok = trees[name].check();
-        cout << "-> " << (ok ? "TRUE" : "FALSE") << "\n";
-        return;
-    }
+    if (cmd == "TPUSH") { if (rest.size() == 1) { trees[name].insert(rest[0]); cout << "-> " << rest[0] << "\n"; } return; }
+    if (cmd == "TBREAK") { if (rest.size() == 3) { bool ok = trees[name].forceInsert(rest[0], rest[1][0], rest[2]); cout << "-> " << (ok ? "OK" : "FAILED") << "\n"; } return; }
+    if (cmd == "TGET" || cmd == "ISMEMBER") { if (rest.size() == 1) { cout << "-> " << (trees[name].find(rest[0]) ? "TRUE" : "FALSE") << "\n"; } return; }
+    if (cmd == "TCHECK") { cout << "-> " << (trees[name].check() ? "TRUE" : "FALSE") << "\n"; return; }
     if (cmd == "TSIZE") { cout << "-> " << trees[name].size() << "\n"; return; }
 
     //Вывод
@@ -279,27 +170,21 @@ void processCommand(const string& query) {
         cout << "-> ERROR: '" << name << "' not found\n";
         return;
     }
-
     cout << "-> ERROR: unknown command '" << cmd << "'\n";
 }
 
 int main(int argc, char* argv[]) {
     string filePath, query;
-
     for (int i = 1; i < argc; i++) {
         string a = argv[i];
         if (a == "--file" && i + 1 < argc) filePath = argv[++i];
         else if (a == "--query" && i + 1 < argc) query = argv[++i];
     }
-
     if (filePath.empty() || query.empty()) {
-        cout << "Usage: ./LR1 --file <file> --query '<command>'\n";
-        return 1;
+        cout << "Usage: ./LR1 --file <file> --query '<command>'\n"; return 1;
     }
-
     loadFromFile(filePath);
     processCommand(query);
     saveToFile(filePath);
-
     return 0;
 }
